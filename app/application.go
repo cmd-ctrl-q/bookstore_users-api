@@ -1,6 +1,9 @@
 package app
 
-import "github.com/gin-gonic/gin"
+import (
+	"github.com/cmd-ctrl-q/bookstore_users-api/logger"
+	"github.com/gin-gonic/gin"
+)
 
 var (
 	router = gin.Default() // point router to gin engine
@@ -9,7 +12,8 @@ var (
 // StartApplication is caleld in main.go to start app
 func StartApplication() {
 
-	mapUrls()           // define maps
-	router.Run(":8080") // run router
+	mapUrls()
 
+	logger.Info("about to launch application...")
+	router.Run(":8080") // run router
 }
