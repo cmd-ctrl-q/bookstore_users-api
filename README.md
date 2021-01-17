@@ -1,6 +1,12 @@
 # bookstore_users-api
 
 
+### modules and dependencies
+
+check why a go module is needed and see paths using it 
+`go mod why -m github.com/mercadolibre/golang-restclient`
+
+
 ### goroot and gopath
 GOROOT: where go is installed. Default: `/usr/local/go`
 - export GOROOT=/usr/local/go

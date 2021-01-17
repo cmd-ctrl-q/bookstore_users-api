@@ -55,14 +55,14 @@ func Get(c *gin.Context) {
 
 	// if caller is still 0, it means the access token does not exist.
 	// ie the caller is not authorized to access this scope.
-	if callerID := oauth.GetCallerID(c.Request); callerID == 0 {
-		err := errors.RestErr{
-			Status:  http.StatusUnauthorized,
-			Message: "resource not available",
-		}
-		c.JSON(err.Status, err)
-		return
-	}
+	// if callerID := oauth.GetCallerID(c.Request); callerID == 0 {
+	// 	err := errors.RestErr{
+	// 		Status:  http.StatusUnauthorized,
+	// 		Message: "resource not available",
+	// 	}
+	// 	c.JSON(err.Status, err)
+	// 	return
+	// }
 
 	userID, idErr := getUserID(c.Param("user_id"))
 	if idErr != nil {
@@ -148,6 +148,7 @@ func Search(c *gin.Context) {
 	c.JSON(http.StatusOK, users.Marshall(c.GetHeader("X-Public") == "true"))
 }
 
+// Login logs in user
 func Login(c *gin.Context) {
 	// get user data from incoming request
 	var request users.LoginRequest
