@@ -1,6 +1,16 @@
 # bookstore_users-api
 
 
+### goroot and gopath
+GOROOT: where go is installed. Default: `/usr/local/go`
+- export GOROOT=/usr/local/go
+- export PATH=$PATH:$GOROOT/bin
+
+if Go < 1.13 then ever ygo project must be cloned from inside the gopath.
+if >= 1.13 every go project must be cloned outside from gopath.
+go 1.13 introduces modules. 
+
+
 ### INFO
 
 Users API

@@ -14,7 +14,7 @@ const (
 	mysqlUsersUsername = "mysql_users_username"
 	mysqlUsersPassword = "mysql_users_password"
 	mysqlUsersHost     = "mysql_users_host"
-	mysqlUsersScheme   = "mysql_users_scheme"
+	mysqlUsersScheme   = "mysql_users_schema"
 )
 
 var (

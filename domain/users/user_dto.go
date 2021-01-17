@@ -20,7 +20,8 @@ type User struct {
 	Email       string `json:"email"`
 	DateCreated string `json:"date_created"`
 	Status      string `json:"status"`
-	Password    string `json:"-"` // hide field
+	Password    string `json:"password"` // hide field
+	// Password    string `json:"-"` // hide field
 }
 
 // Users is a slice of User
