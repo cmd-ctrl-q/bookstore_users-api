@@ -4,7 +4,7 @@ import (
 	"strings"
 	"unicode"
 
-	"github.com/cmd-ctrl-q/bookstore_users-api/utils/errors"
+	"github.com/cmd-ctrl-q/bookstore_utils-go/rest_errors"
 )
 
 const (
@@ -24,17 +24,14 @@ type User struct {
 	// Password    string `json:"-"` // hide field
 }
 
-// Users is a slice of User
-type Users []User
-
 // Validate cleans up user data before allowing other services to process it.
-func (user *User) Validate() *errors.RestErr {
+func (user *User) Validate() *rest_errors.RestErr {
 	user.FirstName = strings.TrimSpace(strings.ToLower(user.FirstName))
 	user.LastName = strings.TrimSpace(strings.ToLower(user.LastName))
 
 	user.Email = strings.TrimSpace(strings.ToLower(user.Email))
 	if user.Email == "" {
-		return errors.NewBadRequestError("invalid email address")
+		return rest_errors.NewBadRequestError("invalid email address")
 	}
 
 	user.Password = strings.TrimSpace(user.Password)

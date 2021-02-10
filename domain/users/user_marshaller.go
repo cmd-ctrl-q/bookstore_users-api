@@ -2,6 +2,8 @@ package users
 
 import "encoding/json"
 
+type Users []User
+
 // PublicUser struct is for public requests
 type PublicUser struct {
 	ID          int64  `json:"id"`

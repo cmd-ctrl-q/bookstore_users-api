@@ -1,13 +1,14 @@
 package users
 
 import (
+	"errors"
 	"fmt"
 	"strings"
 
 	"github.com/cmd-ctrl-q/bookstore_users-api/datasources/mysql/users_db"
-	"github.com/cmd-ctrl-q/bookstore_users-api/logger"
-	"github.com/cmd-ctrl-q/bookstore_users-api/utils/errors"
 	"github.com/cmd-ctrl-q/bookstore_users-api/utils/mysql_utils"
+	"github.com/cmd-ctrl-q/bookstore_utils-go/logger"
+	"github.com/cmd-ctrl-q/bookstore_utils-go/rest_errors"
 )
 
 const (
@@ -24,12 +25,12 @@ var (
 )
 
 // Get attempts to get the users data from the db
-func (user *User) Get() *errors.RestErr {
+func (user *User) Get() *rest_errors.RestErr {
 
 	stmt, err := users_db.Client.Prepare(queryGetUser)
 	if err != nil {
-		logger.Error("error when trying to prepare get user statement", err)
-		return errors.NewInternalServerError("database error")
+		logger.Error("error when trying to get user statement", err)
+		return rest_errors.NewInternalServerError("error when trying to get user", errors.New("database error"))
 	}
 	defer stmt.Close()
 
@@ -38,18 +39,18 @@ func (user *User) Get() *errors.RestErr {
 	if getErr := result.Scan(&user.ID, &user.FirstName, &user.LastName, &user.Email, &user.DateCreated, &user.Status); getErr != nil {
 		// user not found
 		logger.Error("error when trying to get user by id", getErr)
-		return errors.NewInternalServerError("database error") // new
+		return rest_errors.NewInternalServerError("error when trying to get user", errors.New("database error")) // new
 		// return mysql_utils.ParseError(getErr) // old
 	}
 	return nil
 }
 
 // Save attempts to save a user in the database
-func (user *User) Save() *errors.RestErr {
+func (user *User) Save() *rest_errors.RestErr {
 	stmt, err := users_db.Client.Prepare(queryInsertUser)
 	if err != nil {
 		logger.Error("error when trying to prepare save user statement", err)
-		return errors.NewInternalServerError("database error") // new
+		return rest_errors.NewInternalServerError("error when trying to get user", errors.New("database error")) // new
 		// return errors.NewInternalServerError(err.Error()) // old
 	}
 	defer stmt.Close()
@@ -58,7 +59,7 @@ func (user *User) Save() *errors.RestErr {
 	insertResult, saveErr := stmt.Exec(user.FirstName, user.LastName, user.Email, user.DateCreated, user.Status, user.Password)
 	if saveErr != nil {
 		logger.Error("error when trying to save user", saveErr)
-		return errors.NewInternalServerError("database error") // new
+		return rest_errors.NewInternalServerError("error when trying to get user", errors.New("database error")) // new
 		// return mysql_utils.ParseError(saveErr) // old
 	}
 
@@ -66,7 +67,7 @@ func (user *User) Save() *errors.RestErr {
 	userID, err := insertResult.LastInsertId()
 	if err != nil {
 		logger.Error("error when trying to get last insert id after creating a new user", err)
-		return errors.NewInternalServerError("database error") // new
+		return rest_errors.NewInternalServerError("error when trying to save user", errors.New("database error")) // new
 		// return mysql_utils.ParseError(err) // old
 	}
 	user.ID = userID
@@ -74,11 +75,11 @@ func (user *User) Save() *errors.RestErr {
 }
 
 // Update updates an existing user's fields in the db
-func (user *User) Update() *errors.RestErr {
+func (user *User) Update() *rest_errors.RestErr {
 	stmt, err := users_db.Client.Prepare(queryUpdateUser)
 	if err != nil {
 		logger.Error("error when trying to prepare update user statement", err)
-		return errors.NewInternalServerError("database error") // new
+		return rest_errors.NewInternalServerError("error when trying to update user", errors.New("database error")) // new
 		// return errors.NewInternalServerError(err.Error()) // old
 	}
 	defer stmt.Close()
@@ -87,37 +88,36 @@ func (user *User) Update() *errors.RestErr {
 	_, err = stmt.Exec(user.FirstName, user.LastName, user.Email, user.ID)
 	if err != nil {
 		logger.Error("error when trying to update user", err)
-		return errors.NewInternalServerError("database error") // new
+		return rest_errors.NewInternalServerError("error when trying to update user", errors.New("database error")) // new
 		// return mysql_utils.ParseError(err) // old
 	}
 	return nil
 }
 
 // Delete attempts to delete an existing user from the db
-func (user *User) Delete() *errors.RestErr {
+func (user *User) Delete() *rest_errors.RestErr {
 	stmt, err := users_db.Client.Prepare(queryDeleteUser)
 	if err != nil {
 		logger.Error("error when trying to prepare delete user statement", err)
-		return errors.NewInternalServerError("database error") // new
+		return rest_errors.NewInternalServerError("error when trying to delete user", errors.New("database error")) // new
 		// return errors.NewInternalServerError((err.Error()))
 	}
 	defer stmt.Close()
 
 	if _, err = stmt.Exec(user.ID); err != nil {
 		logger.Error("error when trying to delete user", err)
-		return errors.NewInternalServerError("database error") // new
+		return rest_errors.NewInternalServerError("error when trying to delete user", errors.New("database error")) // new
 		// return mysql_utils.ParseError(err)
 	}
 	return nil
 }
 
 // FindByStatus finds users in the database based on an input status and returns the list of users.
-func (user *User) FindByStatus(status string) ([]User, *errors.RestErr) {
+func (user *User) FindByStatus(status string) (Users, *rest_errors.RestErr) {
 	stmt, err := users_db.Client.Prepare(queryFindByStatus)
 	if err != nil {
 		logger.Error("error when trying to prepare find users by status statement", err)
-		return nil, errors.NewInternalServerError("database error") // new
-		// return nil, errors.NewInternalServerError(err.Error()) // old
+		return nil, rest_errors.NewInternalServerError("error when trying to find user", errors.New("database error"))
 	}
 	defer stmt.Close()
 
@@ -125,7 +125,7 @@ func (user *User) FindByStatus(status string) ([]User, *errors.RestErr) {
 	rows, err := stmt.Query(status)
 	if err != nil {
 		logger.Error("error when trying to find users by status", err)
-		return nil, errors.NewInternalServerError("database error") // new
+		return nil, rest_errors.NewInternalServerError("error when trying to find user", errors.New("database error")) // new
 		// return nil, mysql_utils.ParseError(err) // old
 	}
 	defer rows.Close()
@@ -135,25 +135,25 @@ func (user *User) FindByStatus(status string) ([]User, *errors.RestErr) {
 		var user User
 		if err := rows.Scan(&user.ID, &user.FirstName, &user.LastName, &user.Email, &user.DateCreated, &user.Status); err != nil {
 			logger.Error("error when scanning user row into user struct", err)
-			return nil, errors.NewInternalServerError("database error") // new
+			return nil, rest_errors.NewInternalServerError("error when trying to find user", errors.New("database error")) // new
 			// return nil, mysql_utils.ParseError(err) // old
 		}
 		results = append(results, user)
 	}
 
 	if len(results) == 0 {
-		return nil, errors.NewNotFoundError(fmt.Sprintf("no users matching status %s", status))
+		return nil, rest_errors.NewNotFoundError(fmt.Sprintf("no users matching status %s", status))
 	}
 	return results, nil
 }
 
 // FindByEmailAndPassword finds user by their email and password
-func (user *User) FindByEmailAndPassword() *errors.RestErr {
+func (user *User) FindByEmailAndPassword() *rest_errors.RestErr {
 
 	stmt, err := users_db.Client.Prepare(queryFindByEmailAndPassword)
 	if err != nil {
 		logger.Error("error when trying to prepare get user by email and password statement", err)
-		return errors.NewInternalServerError("database error")
+		return rest_errors.NewInternalServerError("error when trying to find user", errors.New("database error"))
 	}
 	defer stmt.Close()
 
@@ -163,10 +163,10 @@ func (user *User) FindByEmailAndPassword() *errors.RestErr {
 	if getErr := result.Scan(&user.ID, &user.FirstName, &user.LastName, &user.Email, &user.DateCreated, &user.Status); getErr != nil {
 		// user not found
 		if strings.Contains(getErr.Error(), mysql_utils.ErrorNoRows) {
-			return errors.NewNotFoundError("invalid user credentials")
+			return rest_errors.NewNotFoundError("invalid user credentials")
 		}
 		logger.Error("error when trying to get user by email and password", getErr)
-		return errors.NewInternalServerError("database error") // new
+		return rest_errors.NewInternalServerError("error when trying to find user", errors.New("database error")) // new
 		// return mysql_utils.ParseError(getErr) // old
 	}
 	return nil

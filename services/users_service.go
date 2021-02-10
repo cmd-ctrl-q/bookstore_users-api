@@ -4,7 +4,7 @@ import (
 	"github.com/cmd-ctrl-q/bookstore_users-api/domain/users"
 	"github.com/cmd-ctrl-q/bookstore_users-api/utils/crypto_utils"
 	"github.com/cmd-ctrl-q/bookstore_users-api/utils/date_utils"
-	"github.com/cmd-ctrl-q/bookstore_users-api/utils/errors"
+	"github.com/cmd-ctrl-q/bookstore_utils-go/rest_errors"
 )
 
 var (
@@ -16,16 +16,16 @@ type usersService struct{}
 
 // UserServiceInterface is an interface for user CRUD methods
 type usersServiceInterface interface {
-	CreateUser(users.User) (*users.User, *errors.RestErr)
-	GetUser(int64) (*users.User, *errors.RestErr)
-	UpdateUser(bool, users.User) (*users.User, *errors.RestErr)
-	DeleteUser(int64) *errors.RestErr
-	SearchUser(string) (users.Users, *errors.RestErr)
-	LoginUser(users.LoginRequest) (*users.User, *errors.RestErr)
+	CreateUser(users.User) (*users.User, *rest_errors.RestErr)
+	GetUser(int64) (*users.User, *rest_errors.RestErr)
+	UpdateUser(bool, users.User) (*users.User, *rest_errors.RestErr)
+	DeleteUser(int64) *rest_errors.RestErr
+	SearchUser(string) (users.Users, *rest_errors.RestErr)
+	LoginUser(users.LoginRequest) (*users.User, *rest_errors.RestErr)
 }
 
 // CreateUser creates the user data that is received from the CreateUser controller
-func (s *usersService) CreateUser(user users.User) (*users.User, *errors.RestErr) {
+func (s *usersService) CreateUser(user users.User) (*users.User, *rest_errors.RestErr) {
 
 	// validate user data
 	if err := user.Validate(); err != nil {
@@ -43,7 +43,7 @@ func (s *usersService) CreateUser(user users.User) (*users.User, *errors.RestErr
 }
 
 // GetUser gets and returns a user by their user id
-func (s *usersService) GetUser(userID int64) (*users.User, *errors.RestErr) {
+func (s *usersService) GetUser(userID int64) (*users.User, *rest_errors.RestErr) {
 
 	// create new instance of user and give it userID
 	result := &users.User{ID: userID}
@@ -58,7 +58,7 @@ func (s *usersService) GetUser(userID int64) (*users.User, *errors.RestErr) {
 }
 
 // UpdateUser updates current user and returns an updated user
-func (s *usersService) UpdateUser(isPartial bool, user users.User) (*users.User, *errors.RestErr) {
+func (s *usersService) UpdateUser(isPartial bool, user users.User) (*users.User, *rest_errors.RestErr) {
 
 	// check and return current user in db
 	current, err := UsersService.GetUser(user.ID)
@@ -98,18 +98,18 @@ func (s *usersService) UpdateUser(isPartial bool, user users.User) (*users.User,
 }
 
 // DeleteUser attempts to delete a user from the database
-func (s *usersService) DeleteUser(userID int64) *errors.RestErr {
+func (s *usersService) DeleteUser(userID int64) *rest_errors.RestErr {
 	user := &users.User{ID: userID}
 	return user.Delete()
 }
 
 // SearchUser gets all of the users with a particular status and returns the list of users with that status
-func (s *usersService) SearchUser(status string) (users.Users, *errors.RestErr) {
+func (s *usersService) SearchUser(status string) (users.Users, *rest_errors.RestErr) {
 	dao := &users.User{}
 	return dao.FindByStatus(status)
 }
 
-func (s *usersService) LoginUser(request users.LoginRequest) (*users.User, *errors.RestErr) {
+func (s *usersService) LoginUser(request users.LoginRequest) (*users.User, *rest_errors.RestErr) {
 	dao := &users.User{
 		Email:    request.Email,
 		Password: crypto_utils.GetMD5(request.Password),

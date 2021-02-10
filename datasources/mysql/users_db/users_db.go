@@ -7,7 +7,9 @@ import (
 	"os"
 
 	// Driver
-	_ "github.com/go-sql-driver/mysql"
+	"github.com/go-sql-driver/mysql"
+
+	"github.com/cmd-ctrl-q/bookstore_utils-go/logger"
 )
 
 const (
@@ -20,6 +22,11 @@ const (
 var (
 	// Client is the users database (schema: users_db)
 	Client *sql.DB
+
+	// os.Setenv("", mysqlUsersUsername)
+	// os.Setenv("", mysqlUsersPassword)
+	// os.Setenv("", mysqlUsersHost)
+	// os.Setenv("", mysqlUsersScheme)
 
 	username = os.Getenv(mysqlUsersUsername)
 	password = os.Getenv(mysqlUsersPassword)
@@ -47,5 +54,6 @@ func init() {
 		panic(err)
 	}
 
+	mysql.SetLogger(logger.GetLogger())
 	log.Println("database successfully configured")
 }
